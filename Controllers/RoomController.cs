@@ -17,16 +17,17 @@ namespace HogwartsPotions.Controllers
             _roomService = roomService;
         }
 
-        [HttpGet]
+        [HttpGet("getAllRooms")]
         public async Task<List<Room>> GetAllRooms()
         {
             return await _roomService.GetAllRooms();
         }
 
-        [HttpPost]
-        public async  Task AddRoom([FromBody] Room room)
+        [HttpPost("addRoom")]
+        public async Task AddRoom([FromBody] Room room)
         {
             await _roomService.AddRoom(room);
+            
         }
 
         [HttpGet("{id}")]

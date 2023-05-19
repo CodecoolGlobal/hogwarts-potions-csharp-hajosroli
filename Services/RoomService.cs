@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HogwartsPotions.Models;
 using HogwartsPotions.Models.Entities;
+using HogwartsPotions.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace HogwartsPotions.Services
 {
@@ -20,32 +23,64 @@ namespace HogwartsPotions.Services
 
         public async Task AddRoom(Room room)
         {
-            throw new NotImplementedException();
+            _context.Rooms.Add(room);
+
+            await _context.SaveChangesAsync();
+           
+
         }
 
         public async Task<Room> GetRoom(long roomId)
         {
-            throw new NotImplementedException();
+            var room = await _context.Rooms.FindAsync(roomId);
+            return room;
         }
 
         public async Task<List<Room>> GetAllRooms()
         {
-            throw new NotImplementedException();
+            var rooms = await _context.Rooms.ToListAsync();
+            return rooms;
         }
 
-        public async Task UpdateRoom(Room room)
+        public async Task UpdateRoom( Room room)
         {
-            throw new NotImplementedException();
+            var roomToUpdate = await _context.Rooms.FindAsync(room.Id);
+            if (roomToUpdate != null)
+            {
+                roomToUpdate.Id = room.Id;
+                roomToUpdate.Capacity = room.Capacity;
+                roomToUpdate.Residents = room.Residents;
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteRoom(long id)
         {
-            throw new NotImplementedException();
+            var room = await _context.Rooms.FindAsync(id);
+            if (room != null) _context.Rooms.Remove(room);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<Room>> GetRoomsForRatOwners()
+        {   
+            var rooms = await _context.Rooms.Where(room => !IsCatOrOwlInTheRoom(room)).ToListAsync();
+            return rooms;
+        }
+
+        private bool IsCatOrOwlInTheRoom(Room room)
         {
-            throw new NotImplementedException();
+            bool result = false;
+            foreach(var student in room.Residents)
+            {
+                if(student.PetType == PetType.Cat|| student.PetType == PetType.Owl)
+                {
+                    result = true;
+                    break;
+                }
+                else result = false;
+            }
+            return result;
         }
     }
 }
