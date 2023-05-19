@@ -37,26 +37,10 @@ public class RecipeService : IRecipeService
             Name = recipe.Name
         };
         var student = _context.Students.FirstOrDefault(s => s.Name == recipe.Student.Name);
-        /*var ingredients = recipe.Ingredients
-            .Select(i => new Ingredients { Name = i.Name, Recipes = new List<Recipe> { newRecipe } }).ToList();*/
-        var ingredients2 = new List<Ingredients>();
+       
         
-        foreach (var ingredient in recipe.Ingredients)
-        {
-            if (_context.Ingredients.Any(i => i.Name == ingredient.Name))
-            {
-                ingredients2.Add(_context.Ingredients.FirstOrDefault(i => i.Name == ingredient.Name));
-                ingredient.Recipes = new List<Recipe> { newRecipe };
-            }
-            else
-            {
-                var newIngredient = new Ingredients{Name = ingredient.Name, Recipes = new List<Recipe>{newRecipe}};
-                ingredients2.Add(newIngredient);
-                _context.Ingredients.Add(newIngredient);
-            } 
-        }
         newRecipe.Student = student;
-        newRecipe.Ingredients = ingredients2;
+        newRecipe.Ingredients = GetIngredients(_context.Ingredients.ToList(), recipe.Ingredients, newRecipe);
         _context.Recipes.Add(newRecipe);
         await _context.SaveChangesAsync();
         return newRecipe;
@@ -64,12 +48,24 @@ public class RecipeService : IRecipeService
     
     //public void AddIngredientsToRecipe()
 
-    public IEnumerable<Ingredients> GetIngredients(long id)
+    public List<Ingredients> GetIngredients(List<Ingredients> contextIngredients, List<Ingredients> recipeIngredients, Recipe recipe)
     {
-        var ingredients =  _context.Recipes
-            .Where(r => r.Id == id)
-            .SelectMany(r => r.Ingredients)
-            .ToList();
+        var ingredients = new List<Ingredients>();
+        foreach (var ingredient in recipeIngredients)
+        {
+            if (contextIngredients.Any(i => i.Name == ingredient.Name))
+            {
+                ingredients.Add(_context.Ingredients.FirstOrDefault(i => i.Name == ingredient.Name));
+                ingredient.Recipes = new List<Recipe> { recipe };
+            }
+            else
+            {
+                var newIngredient = new Ingredients{Name = ingredient.Name, Recipes = new List<Recipe>{recipe}};
+                ingredients.Add(newIngredient);
+                contextIngredients.Add(newIngredient);
+            } 
+        }
+
         return ingredients;
     }
     public async Task DeleteRecipe(long id)

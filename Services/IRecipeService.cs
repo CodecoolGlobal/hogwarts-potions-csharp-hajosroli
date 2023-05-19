@@ -10,6 +10,6 @@ public interface IRecipeService
     Task<List<Recipe>> GetAllRecipes();
     Task<Recipe> GetRecipe(long id);
     Task<Recipe> AddRecipe(RecipeCreateDto recipe);
-    IEnumerable<Ingredients> GetIngredients(long id);
+    List<Ingredients> GetIngredients(List<Ingredients> contextIngredients, List<Ingredients> ingredients, Recipe recipe);
     Task DeleteRecipe(long id);
 }

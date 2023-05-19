@@ -26,9 +26,7 @@ public class PotionService: IPotionService
         var newPotion = new Potion
         {
             Name = potion.Name,
-            
         };
-        //var student = await _context.Students.FirstOrDefault(s => s.Name == potion.Student.Name);
         var result = await Task.Run(() =>
         {
             var student = _context.Students.FirstOrDefault(s => s.Name == potion.Student.Name);
@@ -38,47 +36,32 @@ public class PotionService: IPotionService
                 .ToList();
             
             newPotion.Status = SetBrewingStatus(potion, recipes);
-            Console.WriteLine("here");
             Console.WriteLine(newPotion.Status);
-            if ( newPotion.Status == BrewingStatus.Discovery)
-            {
-                _context.Recipes.Add(AddNewRecipe(potion));
-            }
-
-            newPotion.Ingredients = potion.Ingredients.Select(i => i).ToList();
+            newPotion.Recipe = newPotion.Status == BrewingStatus.Discovery ? AddNewRecipe(potion) : CheckIngredients(potion, recipes);
+            newPotion.Ingredients = newPotion.Recipe.Ingredients;//_recipeService.GetIngredients(_context.Ingredients.ToList(), potion.Ingredients, newPotion.Recipe);
             newPotion.Student = student;
-            newPotion.Recipe = AddNewRecipe(potion);
             _context.Potions.Add(newPotion); 
             _context.SaveChanges();
             return newPotion;
-            
         });
         return result;
-
     }
     
     private BrewingStatus SetBrewingStatus(PotionCreateDto potion, List<Recipe> recipes )
     {
-        Console.WriteLine("bbbbb");
-        Console.WriteLine($"itt van {CheckIngredients(potion, recipes)}");
-        Console.WriteLine(potion.Ingredients.Count);
         var status = BrewingStatus.Brew;
         if (potion.Ingredients.Count < 5)
         {
-            Console.WriteLine("iiiiii");
             status = BrewingStatus.Brew;
         }
-        else if (potion.Ingredients.Count >= 5 && CheckIngredients(potion, recipes))
+        else if (potion.Ingredients.Count >= 5 && CheckIngredients(potion, recipes) != null)
         {
-            
             status = BrewingStatus.Replica;
         }
         else
         {
-            Console.WriteLine("aaaaa");
             status = BrewingStatus.Discovery;
         }
-
         return status;
     }
 
@@ -86,23 +69,20 @@ public class PotionService: IPotionService
     {
         var newRecipe = new Recipe
         {
-            Ingredients = potion.Ingredients
+            
         };
         var student = _context.Students.FirstOrDefault(s => s.Name == potion.Student.Name);
         newRecipe.Student = student;
-        newRecipe.Name = $"{potion.Student.Name}'s discovery#{newRecipe.Id}";
-
+        newRecipe.Name = $"{potion.Student.Name}'s discovery#{_context.Recipes.Count(r => r.Student == student) + 1}";
+        newRecipe.Ingredients = _recipeService.GetIngredients(_context.Ingredients.ToList(), potion.Ingredients, newRecipe);
         return newRecipe;
     }
-    private bool CheckIngredients(PotionCreateDto potion, List<Recipe> recipes)
+    private Recipe CheckIngredients(PotionCreateDto potion, List<Recipe> recipes)
     {
-        bool result = false;
-        Console.WriteLine("ez" + recipes.First().Ingredients.Count);
         foreach (var contextRecipe in recipes)
         {  
             int counter = 0;
             var ingredients = contextRecipe.Ingredients;
-            
             foreach (var contextRecipeIngredient in  ingredients)
             {
                 foreach (var potionIngredient in potion.Ingredients)
@@ -114,9 +94,13 @@ public class PotionService: IPotionService
                     }
                 }
             }
-            result = counter == potion.Ingredients.Count;
+            if (counter == potion.Ingredients.Count)
+            {
+                return contextRecipe;
+            }
         }
-        return result;
+
+        return null;
     }
     
 
