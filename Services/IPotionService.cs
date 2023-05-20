@@ -7,9 +7,10 @@ namespace HogwartsPotions.Services;
 
 public interface IPotionService
 {
-    Task<Potion> AddPotion(PotionCreateDto potion);
-    Task<Potion> GetPotion(long potionId);
+    Task<Potion> AddBrewPotion(PotionCreateDto brewPotion);
+    //Task<Potion> AddPotion(PotionCreateDto potion);
+    Task<List<Potion>> GetPotionsOfStudent(long studentId);
     Task<List<Potion>> GetAllPotions();
-    Task UpdatePotion(Potion potion);
+    Task<Potion> AddIngredient(long potionId, IngredientCreateDto ingredient);
     Task DeletePotion(long id);
 }

@@ -3,4 +3,4 @@ using HogwartsPotions.Models.Entities;
 
 namespace HogwartsPotions.DTO;
 
-public record struct PotionCreateDto(string Name, StudentCreateDto Student, List<Ingredients> Ingredients);
+public record struct PotionCreateDto(long StudentId, List<Ingredients> Ingredients);
