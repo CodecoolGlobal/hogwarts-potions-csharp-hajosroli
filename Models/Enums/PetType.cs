@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace HogwartsPotions.Models.Enums
+namespace HogwartsPotions.Models.Enums;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PetType : byte
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum PetType : byte
-    {
-        None,
-        Cat,
-        Rat,
-        Owl
-    }
+    None,
+    Cat,
+    Rat,
+    Owl
 }

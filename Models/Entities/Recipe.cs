@@ -7,9 +7,8 @@ public class Recipe
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
+
     public string Name { get; set; }
     public Student Student { get; set; }
     public List<Ingredients> Ingredients { get; set; }
-
-
 }

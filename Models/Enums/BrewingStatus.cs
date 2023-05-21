@@ -1,12 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace HogwartsPotions.Models.Enums
+namespace HogwartsPotions.Models.Enums;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum BrewingStatus : byte
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum BrewingStatus : byte
-    {
-        Brew,
-        Replica,
-        Discovery
-    }
+    Brew,
+    Replica,
+    Discovery
 }

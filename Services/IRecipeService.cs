@@ -10,6 +10,9 @@ public interface IRecipeService
     Task<List<Recipe>> GetAllRecipes();
     Task<Recipe> GetRecipe(long id);
     Task<Recipe> AddRecipe(RecipeCreateDto recipe);
-    List<Ingredients> GetIngredients(List<Ingredients> contextIngredients, List<Ingredients> ingredients, Recipe recipe);
+
+    List<Ingredients> GetIngredients(List<Ingredients> contextIngredients, List<Ingredients> ingredients,
+        Recipe recipe);
+
     Task DeleteRecipe(long id);
 }

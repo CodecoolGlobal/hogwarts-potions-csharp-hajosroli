@@ -1,13 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace HogwartsPotions.Models.Enums
+namespace HogwartsPotions.Models.Enums;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum HouseType : byte
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum HouseType : byte
-    {
-        Gryffindor,
-        Hufflepuff,
-        Ravenclaw,
-        Slytherin
-    }
+    Gryffindor,
+    Hufflepuff,
+    Ravenclaw,
+    Slytherin
 }

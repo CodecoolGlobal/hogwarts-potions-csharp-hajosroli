@@ -8,9 +8,10 @@ public class Ingredients
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
+
     public string Name { get; set; }
-    [JsonIgnore]
-    public List<Recipe> Recipes { get; set; }
-    [JsonIgnore]
-    public List<Potion> Potions { get; set; }
+
+    [JsonIgnore] public List<Recipe> Recipes { get; set; }
+
+    [JsonIgnore] public List<Potion> Potions { get; set; }
 }
