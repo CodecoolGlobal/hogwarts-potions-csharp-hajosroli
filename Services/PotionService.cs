@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HogwartsPotions.Services;
 
-public class PotionService: IPotionService
+public class PotionService : IPotionService
 {
     private readonly HogwartsContext _context;
     private readonly IRecipeService _recipeService;
@@ -34,16 +34,15 @@ public class PotionService: IPotionService
             var recipes = _context.Recipes
                 .Include(r => r.Ingredients)
                 .ToList();
-            newBrewPotion.Status = SetBrewingStatus(brewPotion, recipes);
+            newBrewPotion.Status = BrewingStatus.Brew;
             _context.Potions.Add(newBrewPotion);
             _context.SaveChanges();
             return newBrewPotion;
         });
 
         return result;
-
     }
-    
+
 
     /*public async Task<Potion> AddPotion(PotionCreateDto potion)
     {
@@ -71,7 +70,7 @@ public class PotionService: IPotionService
         return result;
     }*/
 
-   
+
     public async Task<List<Potion>> GetPotionsOfStudent(long studentId)
     {
         return await _context.Potions
@@ -80,14 +79,14 @@ public class PotionService: IPotionService
             .ToListAsync();
     }
 
-    private BrewingStatus SetBrewingStatus(PotionCreateDto potion, List<Recipe> recipes )
+    private BrewingStatus SetBrewingStatus(Potion potion, List<Recipe> recipes)
     {
         var status = BrewingStatus.Brew;
         if (potion.Ingredients.Count < 5)
         {
             status = BrewingStatus.Brew;
         }
-        else if (potion.Ingredients.Count >= 5 && CheckIngredients(potion, recipes) != null)
+        else if (potion.Ingredients.Count >= 5 && CheckIngredients(potion, recipes))
         {
             status = BrewingStatus.Replica;
         }
@@ -95,28 +94,31 @@ public class PotionService: IPotionService
         {
             status = BrewingStatus.Discovery;
         }
+
         return status;
     }
 
-    private Recipe AddNewRecipe(PotionCreateDto potion)
+    private Recipe AddNewRecipe(Potion potion)
     {
         var newRecipe = new Recipe();
-        var student = _context.Students.FirstOrDefault(s => s.Id == potion.StudentId);
+        var student = _context.Students.FirstOrDefault(s => s.Id == potion.Student.Id);
         newRecipe.Student = student;
         if (student != null)
             newRecipe.Name = $"{student.Name}'s discovery#{_context.Recipes.Count(r => r.Student == student) + 1}";
-        newRecipe.Ingredients = _recipeService.GetIngredients(_context.Ingredients.ToList(), potion.Ingredients, newRecipe);
+        newRecipe.Ingredients =
+            _recipeService.GetIngredients(_context.Ingredients.ToList(), potion.Ingredients, newRecipe);
         return newRecipe;
     }
-    
-    
-    private Recipe CheckIngredients(PotionCreateDto potion, List<Recipe> recipes)
+
+
+    private bool CheckIngredients(Potion potion, List<Recipe> recipes)
     {
+        bool result = false;
         foreach (var contextRecipe in recipes)
-        {  
+        {
             int counter = 0;
             var ingredients = contextRecipe.Ingredients;
-            foreach (var contextRecipeIngredient in  ingredients)
+            foreach (var contextRecipeIngredient in ingredients)
             {
                 foreach (var potionIngredient in potion.Ingredients)
                 {
@@ -127,6 +129,31 @@ public class PotionService: IPotionService
                     }
                 }
             }
+
+            result = counter == potion.Ingredients.Count;
+        }
+
+        return result;
+    }
+
+    private Recipe ReplicaRecipe(Potion potion, List<Recipe> recipes)
+    {
+        foreach (var contextRecipe in recipes)
+        {
+            int counter = 0;
+            var ingredients = contextRecipe.Ingredients;
+            foreach (var contextRecipeIngredient in ingredients)
+            {
+                foreach (var potionIngredient in potion.Ingredients)
+                {
+                    Console.WriteLine($"potion: {potionIngredient.Id}{potionIngredient.Name}");
+                    if (contextRecipeIngredient.Name == potionIngredient.Name)
+                    {
+                        counter++;
+                    }
+                }
+            }
+
             if (counter == potion.Ingredients.Count)
             {
                 return contextRecipe;
@@ -135,7 +162,7 @@ public class PotionService: IPotionService
 
         return null;
     }
-    
+
 
     public Task<Potion> GetPotion(long potionId)
     {
@@ -154,41 +181,89 @@ public class PotionService: IPotionService
         var potion = await _context.Potions
             .Include(p => p.Ingredients)
             .Include(p => p.Student)
+            .Include(p => p.Recipe)
             .FirstOrDefaultAsync(p => p.Id == potionId);
-        
-            Console.WriteLine(potion.Id);
-            Console.WriteLine(potion.Student.Name);
-            //potion.Recipe = potion.Status == BrewingStatus.Discovery ? AddNewRecipe(potion) : CheckIngredients(potion, recipes);
-            var ingredients = await _context.Ingredients.ToListAsync();
-            Console.WriteLine(ingredients.Count);
-            Console.WriteLine(potion.Recipe.Id);
-            Console.WriteLine(potion.Recipe.Name);
-            Console.WriteLine(CheckIngredientIfExist(ingredient, ingredients, potion.Recipe));
-            potion.Ingredients.Add(CheckIngredientIfExist(ingredient, ingredients, potion.Recipe));
-            Console.WriteLine(potion.Ingredients.First().Name);
-            Console.WriteLine(potion.Ingredients.First().Recipes.First().Name);
-            potion.Name = $"{potion.Student.Name}'s {potion.Ingredients.First().Name} Potion";
-            Console.WriteLine(potion.Name);
-            await _context.SaveChangesAsync();
-            Console.WriteLine(potion.Ingredients.Count);
-            return potion;
-        
-            
+        var recipes = _context.Recipes
+            .Include(r => r.Ingredients)
+            .ToList();
+        var ingredients = await _context.Ingredients.ToListAsync();
+
+        var newIngredient = CheckIngredientIfExist(ingredient, ingredients);
+        potion.Ingredients.Add(newIngredient);
+        potion.Status = SetBrewingStatus(potion, recipes);
+
+        if (potion.Recipe != null)
+        {
+            potion.Recipe.Ingredients.Add(newIngredient);
+        }
+        else if (potion.Status == BrewingStatus.Discovery && potion.Recipe == null)
+        {
+            potion.Recipe = AddNewRecipe(potion);
+        }
+        else if (potion.Status == BrewingStatus.Replica && potion.Recipe == null)
+        {
+            potion.Recipe = ReplicaRecipe(potion, recipes);
+        }
+
+        Console.WriteLine(potion.Status);
+
+        Console.WriteLine(potion.Ingredients.First().Name);
+
+        potion.Name = $"{potion.Student.Name}'s {potion.Ingredients.First().Name} Potion";
+        Console.WriteLine(potion.Name);
+        await _context.SaveChangesAsync();
+        Console.WriteLine(potion.Ingredients.Count);
+        return potion;
     }
 
-    private Ingredients CheckIngredientIfExist(IngredientCreateDto ingredient, List<Ingredients> contextIngredients, Recipe recipe)
+    public async Task<List<Recipe>> GetHelpWithRecipes(long potionId)
     {
-       
-            if (contextIngredients.All(i => i.Name != ingredient.Name))
+        var potion = await _context.Potions
+            .Include(p => p.Ingredients)
+            .Include(p => p.Recipe)
+            .FirstOrDefaultAsync(p => p.Id == potionId);
+        var recipes = _context.Recipes
+            .Include(r => r.Ingredients)
+            .ToList();
+        var sameIngredientsRecipes = new List<Recipe>();
+        foreach (var contextRecipe in recipes)
+        {
+            int counter = 0;
+            var ingredients = contextRecipe.Ingredients;
+            foreach (var contextRecipeIngredient in ingredients)
             {
-                var newIngredient = new Ingredients{Name = ingredient.Name, Recipes = new List<Recipe>{recipe}};
-                contextIngredients.Add(newIngredient);
-                return newIngredient;
+                foreach (var potionIngredient in potion.Ingredients)
+                {
+                    Console.WriteLine($"potion: {potionIngredient.Id}{potionIngredient.Name}");
+                    if (contextRecipeIngredient.Name == potionIngredient.Name)
+                    {
+                        counter++;
+                    }
+                }
             }
-            else
+
+            if (counter == potion.Ingredients.Count)
             {
-                return contextIngredients.FirstOrDefault(i => i.Name == ingredient.Name);
+                sameIngredientsRecipes.Add(contextRecipe);
             }
+        }
+
+        return sameIngredientsRecipes;
+    }
+
+
+    private Ingredients CheckIngredientIfExist(IngredientCreateDto ingredient, List<Ingredients> contextIngredients)
+    {
+        if (contextIngredients.All(i => i.Name != ingredient.Name))
+        {
+            var newIngredient = new Ingredients { Name = ingredient.Name, Recipes = new List<Recipe>() };
+            contextIngredients.Add(newIngredient);
+            return newIngredient;
+        }
+        else
+        {
+            return contextIngredients.FirstOrDefault(i => i.Name == ingredient.Name);
+        }
     }
 
     public Task UpdatePotion(Potion potion)
