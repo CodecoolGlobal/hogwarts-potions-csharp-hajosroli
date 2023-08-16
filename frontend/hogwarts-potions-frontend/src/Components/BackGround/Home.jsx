@@ -1,10 +1,10 @@
-import image from './img/hogwarts-background3.jpeg'
+import image from './img/hogwarts-background.jpeg'
 import "./Home.css"
 
 
 const BackGround = () => (
     <div>
-        <img src={image} className="hogwarts-logo" alt="hogwarts-logo" />
+        <img src={image} className="hogwarts-bg" alt="hogwarts-bg" />
     </div>
 )
 

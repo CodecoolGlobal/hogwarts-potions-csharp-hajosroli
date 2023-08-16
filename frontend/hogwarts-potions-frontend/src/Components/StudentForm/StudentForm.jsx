@@ -1,34 +1,53 @@
 import { Button, Form, Col, Row } from "react-bootstrap"
 import { useEffect, useState } from "react"
-import Loading from "../../Loading/Loading"
+import Loading from "../Loading/Loading"
+import '../../App.css'
 
-const createStudent = async (student) => {
-    try {
-        const response = await fetch("http://localhost:5076/api/Student/addStudent", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(student)
-        });
 
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Error creating student:", error);
-        throw error;
-    }
-};
 
 const StudentForm = ({fetchStudents}) => {
     const[houseTypes,setHouseTypes] = useState([])
     const[petTypes, setPetTypes] = useState([])
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const[student, setStudent] = useState({
         name: "",
         houseType: "",
         petType: ""
     })
+
+    const createStudent = async (student) => {
+        try {
+            const response = await fetch("http://localhost:5076/api/Student/addStudent", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(student)
+            });
+            if (response.status === 409) {
+                // Handle conflict (resource already exists) here
+                setErrorMessage("Student with this name already exists");
+                console.log("Student already exists");
+                // You can display an error message to the user, update UI, etc.
+            } else if (response.ok) {
+                // Handle successful creation here
+                const data = await response.json();
+                setErrorMessage("");
+                console.log("Student created successfully");
+                return data;
+                // You can show a success message, update UI, etc.
+            } else {
+                // Handle other status codes or errors
+                setErrorMessage("You have to fill all the fields!")
+                console.log("Error creating student");
+                // Handle the error case, display an error message, etc.
+            }
+        } catch (error) {
+            console.error("Error creating student:", error);
+            throw error;
+        }
+    };
    
     const handleSubmit = async(e) => {
         e.preventDefault();
@@ -71,13 +90,13 @@ const StudentForm = ({fetchStudents}) => {
     if ( loading) {
         return <Loading />;
       }
-      
+
     return (
         <div>
             <Form onSubmit={handleSubmit}>
           <Row className="mb-3">
             <Form.Group as={Col} md="4" controlId="student.name">
-              <Form.Label>First name</Form.Label>
+              <Form.Label>Name:</Form.Label>
               <Form.Control
                 required
                 type="text"
@@ -85,10 +104,12 @@ const StudentForm = ({fetchStudents}) => {
                 value={student?.name || ""} 
                 onChange={e => setStudent({...student, name: e.target.value})}
               />
-              <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+             {errorMessage && <p className="error"  style={{ color: 'red' }}>{errorMessage}</p>}
             </Form.Group>
             <Form.Group as={Col} md="4" controlId="student.houseType">
+            <Form.Label>House Type:</Form.Label>
             <Form.Select 
+            required
             aria-label="Default select example" 
             value={student?.houseType || ""}  
             onChange={(e)=>setStudent({ ...student , houseType: e.target.value})}
@@ -100,27 +121,29 @@ const StudentForm = ({fetchStudents}) => {
                     </option>
                 ))}
             </Form.Select>
+            {errorMessage && <p className="error"  style={{ color: 'red' }}>{errorMessage}</p>}
             </Form.Group>
-          </Row>
-          <Row className="mb-3">
-          <Form.Group as={Col} md="4" controlId="student.petType">
-            <Form.Select 
-            aria-label="Default select example"
-            value={student?.petType || ""}
-            onChange={(e)=>setStudent({ ...student , petType: e.target.value})}
-            >           
+            <Form.Group as={Col} md="4" controlId="student.petType">
+                <Form.Label>Pet Type:</Form.Label>
+                <Form.Select 
+                required
+                aria-label="Default select example"
+                value={student?.petType || ""}
+                onChange={(e)=>setStudent({ ...student , petType: e.target.value})}
+                >           
                 <option>Open this select menu</option>
                 {petTypes.map((value) => (
                     <option key={value} value={value}>
                         {value}
                     </option>
                 ))}
-            </Form.Select>
+                </Form.Select>
+                {errorMessage && <p className="error"  style={{ color: 'red' }}>{errorMessage}</p>}
             </Form.Group>
           </Row>
-          <Button type="submit">Submit form</Button>
+            <Button type="submit" className="custom-btn">Add Student</Button>
         </Form>
-            </div>
+        </div>
         )
 }
 export default StudentForm;

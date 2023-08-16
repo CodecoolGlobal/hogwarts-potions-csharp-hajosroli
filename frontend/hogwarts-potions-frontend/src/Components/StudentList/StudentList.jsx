@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import Button from "react-bootstrap"
-import StudentForm from "../PotionBrewingForm/StudentForm/StudentForm";
+import {Button, Table} from "react-bootstrap"
+import StudentForm from "../StudentForm/StudentForm";
 
 const deleteStudent = async (id) => {
   try {
@@ -44,7 +44,15 @@ const StudentList = () => {
         <StudentForm
         fetchStudents ={fetchStudents}
         />
-        <table>
+        <Table striped bordered hover size="sm">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>House Type</th>
+              <th>Pet Type</th>
+            </tr>
+          </thead>
           <tbody>
           {students.map((student) =>  (
                   <tr key={student.id}>
@@ -53,14 +61,16 @@ const StudentList = () => {
                     <td>{student.houseType}</td>
                     <td>{student.petType}</td>
                     <td>
-                    <button variant="danger" onClick={() =>handleDelete(student.id)}>
-                      Remove Student
-                    </button>
+                      <>
+                      <Button 
+                      variant="danger" 
+                      onClick={() =>handleDelete(student.id)}>Remove Student</Button>
+                      </>
                     </td>
                   </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
             
   
         </>

@@ -18,6 +18,10 @@ public class StudentService : IStudentService
 
     public async Task<Student> AddStudentToList(Student student)
     {
+        if (await _context.Students.AnyAsync(s => s.Name == student.Name))
+        {
+            return null;
+        }
         _context.Students.Add(student);
         await _context.SaveChangesAsync();
         return student;

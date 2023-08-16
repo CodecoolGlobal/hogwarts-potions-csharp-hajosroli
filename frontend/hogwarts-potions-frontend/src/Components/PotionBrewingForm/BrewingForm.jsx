@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-
+import {Button, Table, Form} from "react-bootstrap"
+import '../../App.css'
 
       const createPotion = (potion) => {
         return fetch("http://localhost:5076/api/potions/brew", {
@@ -15,10 +16,17 @@ import { useState, useEffect } from "react";
           });
       };
 
+      const deletePotion = (id) => {
+        return fetch(`http://localhost:5076/api/potions/deletePotion/${id}`, {
+          method: "DELETE",
+        })
+          .then((res) => res.json())
+          .catch((error) => {
+            console.error("Error deleting potion:", error);
+          });
+      }
+
      
-
-      
-
 const BrewingForm = ()=> {
     const [student, setStudent] = useState({})
     const [potions, setPotions] = useState([])
@@ -26,19 +34,21 @@ const BrewingForm = ()=> {
     const [ingredient, setIngredient] = useState("")
     const [recipes, setRecipes] = useState([])
     
-  
-
-    const handleSubmit =(e)=> {
+    const handleSubmit = async(e)=> {
         e.preventDefault();
         const newPotion = {
             studentId : student
         }
-        createPotion(newPotion) 
-        .then(() => fetchPotions())
-        .then(() => console.log("brew potion was created"))
+        await createPotion(newPotion) 
+        await fetchPotions()
+        await console.log("brew potion was created")
        }
      
-       
+       const handleDelete = async(e) => {
+          await deletePotion(e)
+          await fetchPotions()
+          console.log("potion was deleted")
+       }
        const fetchPotions = async() => {
         const data = await fetch("http://localhost:5076/api/potions/brewPotions")
         const response = await data.json()
@@ -75,25 +85,25 @@ const BrewingForm = ()=> {
         setOpen(!open)
     }
 
-    const addIngredient = (e, id)=>{
+    const addIngredient = async (e, id)=>{
       console.log(id)
       e.preventDefault()
         const newIngredient = {
             name: ingredient
         }
-        updatePotion(newIngredient, id)
-        .then(() => fetchPotions())
+        await updatePotion(newIngredient, id)
+        await fetchPotions()
         setOpen(false)
     }
 
-    const getHelp = (e, id) => {
+    const getHelp = async (e, id) => {
       e.preventDefault()
-      getRecipes(id)
-      .then(()=> console.log(recipes.length))
+      await getRecipes(id)
+     console.log(recipes.length)
     }
     return(
        <>
-    <form className="PotionForm" onSubmit={handleSubmit}>
+    <Form className="PotionForm" onSubmit={handleSubmit}>
   <div className="form-group">
     <label htmlFor="StudentId">Student Id</label>
     <input 
@@ -102,12 +112,12 @@ const BrewingForm = ()=> {
     id="StudentId" 
     placeholder="1" 
     onChange={e => setStudent(e.target.value)}/>
-    <button type="submit">Brew Potion</button>
+    <Button  type="submit" className="custom-btn">Brew Potion</Button>
   </div>
-  </form>
+  </Form>
   <div>
         <h3>Potions</h3>
-        <table>
+        <Table striped bordered hover size="sm">
         <thead>
         <tr>
           <th>Potion Id</th>
@@ -133,15 +143,31 @@ const BrewingForm = ()=> {
                         id="ingredients"
                         onChange={e => setIngredient(e.target.value)}
                       />
-                      <button onClick={e => addIngredient(e, p.id)}>Add</button>
+                      <Button 
+                      variant="success"
+                      onClick={e => addIngredient(e, p.id)}>Add</Button>
                     </td>) :(<td key={`empty-${p.id}`}></td>
                         )}
-                      <td key={`help-${p.id}`}><button onClick={e => {getHelp(e, p.id)}}>Help</button></td>
-                      {recipes ? <td><ul >{recipes.map(r => <li key={r.id}>{r.name}</li>)}</ul></td>: <td></td>}                     
+                      <td key={`help-${p.id}`}>
+                        <Button 
+                        variant="info"
+                        onClick={e => {getHelp(e, p.id)}}>Help
+                        </Button>
+                      </td>
+                       <td>
+                        {recipes ??<ul>{recipes.map(r => <li key={r.id}>{r.name}</li>)}</ul>}   </td>
+                      <td>
+                      <>
+                      <Button 
+                      variant="danger" 
+                      onClick={() =>handleDelete(p.id)}>Remove Potion
+                      </Button>
+                      </>
+                    </td>                   
                 </tr>
             )): <h1>No potions</h1>}
         </tbody>
-        </table>
+        </Table>
   </div>
   </>
 
@@ -149,27 +175,3 @@ const BrewingForm = ()=> {
     )
 }
 export default BrewingForm;
-/*<div class="form-group">
-    <label for="exampleFormControlSelect1">Example select</label>
-    <select class="form-control" id="exampleFormControlSelect1">
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="exampleFormControlSelect2">Example multiple select</label>
-    <select multiple class="form-control" id="exampleFormControlSelect2">
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="exampleFormControlTextarea1">Example textarea</label>
-    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-  </div>*/
