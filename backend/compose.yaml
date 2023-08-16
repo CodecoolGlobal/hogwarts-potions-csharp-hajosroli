@@ -11,16 +11,14 @@ services:
     depends_on:
       - db
     environment:
-      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=hogwarts;User Id =postgres; Password=abcd1234!"
+      ConnectionStrings__DefaultConnection: "Server=db;Port=5432;Database=hogwarts;User Id=postgres;Password=abcd1234!"
   db:
     container_name: db
-    image: postgres:15
+    image: postgres:latest
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=abcd1234!
       - POSTGRES_DB=hogwarts
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 

@@ -128,7 +128,7 @@ const BrewingForm = ()=> {
         </tr>
         </thead>
         <tbody>
-            {potions? potions.map(p => (
+            {potions?? potions.map(p => (
                 <tr key={p.id}>
                     <td>{p.id}</td>
                     <td>{p.student.id}</td>
@@ -165,7 +165,7 @@ const BrewingForm = ()=> {
                       </>
                     </td>                   
                 </tr>
-            )): <h1>No potions</h1>}
+            ))}
         </tbody>
         </Table>
   </div>

@@ -76,17 +76,33 @@ const StudentForm = ({fetchStudents}) => {
         fetchData();
     }, []);
   
-    const fetchHouseTypes = async() => {
-        const data = await fetch("http://localhost:5076/api/student/houseTypes")
-        const response = await data.json()
-        setHouseTypes(response)
-    }
-    const fetchPetTypes = async() => {
-        const data = await fetch("http://localhost:5076/api/student/petTypes")
-        const response = await data.json()
-        setPetTypes(response)
-    }
-
+    const fetchHouseTypes = async () => {
+        try {
+            const response = await fetch("http://localhost:5076/api/student/houseTypes");
+            if (!response.ok) {
+                throw new Error(`Error fetching house types: ${response.statusText}`);
+            }
+            const data = await response.json();
+            setHouseTypes(data);
+        } catch (error) {
+            console.error("An error occurred while fetching house types:", error);
+        }
+    };
+    
+    const fetchPetTypes = async () => {
+        try {
+            const response = await fetch("http://localhost:5076/api/student/petTypes");
+            if (!response.ok) {
+                throw new Error(`Error fetching pet types: ${response.statusText}`);
+            }
+            const data = await response.json();
+            setPetTypes(data);
+        } catch (error) {
+            console.error("An error occurred while fetching pet types:", error);
+          
+        }
+    };
+    
     if ( loading) {
         return <Loading />;
       }
@@ -115,7 +131,7 @@ const StudentForm = ({fetchStudents}) => {
             onChange={(e)=>setStudent({ ...student , houseType: e.target.value})}
             >           
                 <option>Open this select menu</option>
-                {houseTypes.map((value) => (
+                {houseTypes ?? houseTypes.map((value) => (
                     <option key={value} value={value}>
                         {value}
                     </option>
@@ -132,7 +148,7 @@ const StudentForm = ({fetchStudents}) => {
                 onChange={(e)=>setStudent({ ...student , petType: e.target.value})}
                 >           
                 <option>Open this select menu</option>
-                {petTypes.map((value) => (
+                {petTypes ?? petTypes.map((value) => (
                     <option key={value} value={value}>
                         {value}
                     </option>
