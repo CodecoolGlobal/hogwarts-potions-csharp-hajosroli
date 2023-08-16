@@ -1,7 +1,7 @@
 import {NavLink, Outlet} from 'react-router-dom';
 import Navbar from 'react-bootstrap/Navbar';
 import 'bootstrap/dist/css/bootstrap.css';
-import image from '../../../public/hogwarts-logo.png';
+import image from './hogwarts-logo.png';
 import './Menu.css'
 
 const Menu = () => (
