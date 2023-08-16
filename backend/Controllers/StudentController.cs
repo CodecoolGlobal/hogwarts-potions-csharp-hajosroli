@@ -23,9 +23,11 @@ public class StudentController : ControllerBase
 
     // GET: api/Student/getAllStudents
     [HttpGet("getAllStudents")]
-    public async Task<List<Student>> GetAllStudents()
+    public async Task<ActionResult<List<Student>>> GetAllStudents()
     {
-        return await _studentService.GetStudents();
+       var result = await _studentService.GetStudents();
+       if (result is null) return NotFound("No Students");
+       return Ok(result);
     }
 
     // GET: api/Student/5
@@ -52,10 +54,11 @@ public class StudentController : ControllerBase
     }
     // POST: api/addStudent
     [HttpPost("addStudent")]
-    public async Task<Student> AddStudent([FromBody] Student student)
+    public async Task<ActionResult<Student>> AddStudent([FromBody] Student student)
     {
-        await _studentService.AddStudentToList(student);
-        return student;
+        var result = await _studentService.AddStudentToList(student);
+        if (result is null) return Conflict("Student with the same is already exists");
+        return Ok(student);
     }
 
     // PUT: api/Student/5

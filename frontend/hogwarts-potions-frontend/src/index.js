@@ -4,7 +4,7 @@ import './index.css';
 
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import NavBar from './Components/NavBar/Navbar';
+import Menu from './Components/NavBar/Menu';
 import Home from './Components/BackGround/Home';
 import BrewingForm from './Components/PotionBrewingForm/BrewingForm';
 import StudentList from './Components/StudentList/StudentList';
@@ -12,7 +12,7 @@ import StudentList from './Components/StudentList/StudentList';
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <NavBar />,
+    element: <Menu />,
     children: [
       {
         path: "/",
