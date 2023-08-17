@@ -134,7 +134,7 @@ const BrewingForm = ()=> {
                     <td>{p.student.id}</td>
                     <td>{p.student.name}</td>
                     <td>{p.status}</td>
-                    <td><ul>{p.ingredients? p.ingredients.map(i => <li key={i.key}>{i.name}</li>):"no ingredients"}</ul></td>
+                    <td><ul>{p.ingredients? p.ingredients.map(i => <li key={i.id}>{i.name}</li>):"no ingredients"}</ul></td>
                     <td key={`add-ingredient-${p.id}`}><button onClick={openInput}>Add ingredient</button></td>
                   {open ? (
                     <td key={`ingredient-input-${p.id}`}>

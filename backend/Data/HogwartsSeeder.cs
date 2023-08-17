@@ -6,9 +6,9 @@ using HogwartsPotions.Models.Enums;
 
 namespace HogwartsPotions.Data
 {
-    public static class HogwartsContextSeed
+    public class HogwartsContextSeed
     {
-        public static void SeedData(HogwartsContext context)
+        public static void ContextSeed(HogwartsContext context)
         {
             if (!context.Students.Any())
             {
@@ -17,7 +17,7 @@ namespace HogwartsPotions.Data
                     new Student { Name = "Harry Potter", HouseType = HouseType.Gryffindor, PetType = PetType.Owl },
                     new Student { Name = "Hermione Granger", HouseType = HouseType.Gryffindor, PetType = PetType.Cat },
                     new Student { Name = "Ron Weasley", HouseType = HouseType.Gryffindor, PetType = PetType.Rat },
-                    // Add more students here
+                   
                 };
 
                 context.Students.AddRange(students);

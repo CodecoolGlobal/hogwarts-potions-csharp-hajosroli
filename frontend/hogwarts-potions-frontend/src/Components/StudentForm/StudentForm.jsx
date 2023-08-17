@@ -83,6 +83,7 @@ const StudentForm = ({fetchStudents}) => {
                 throw new Error(`Error fetching house types: ${response.statusText}`);
             }
             const data = await response.json();
+            console.log(data)
             setHouseTypes(data);
         } catch (error) {
             console.error("An error occurred while fetching house types:", error);

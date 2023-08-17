@@ -10,19 +10,13 @@ services:
       - "5076:5076"
     depends_on:
       - db
-    networks:
-      - aspnetcoreapp-network
   db:
     container_name: db
     image: postgres
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=hogwarts
-    networks:
-      - aspnetcoreapp-network
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      POSTGRES_PASSWORD: abcd1234
+    ports:
+      - "5433:5432"
 
   frontend:
     container_name: hogwartsfrontend
@@ -33,12 +27,5 @@ services:
       - "3000:3000"
     depends_on:
       - hogwartsbackend 
-    networks:
-      - aspnetcoreapp-network  
 
-volumes:
-  pgdata: {}
 
-networks:
-  aspnetcoreapp-network:
-    driver: bridge
