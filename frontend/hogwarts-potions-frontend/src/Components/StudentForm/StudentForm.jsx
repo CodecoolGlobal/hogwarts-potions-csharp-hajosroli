@@ -132,7 +132,7 @@ const StudentForm = ({fetchStudents}) => {
             onChange={(e)=>setStudent({ ...student , houseType: e.target.value})}
             >           
                 <option>Open this select menu</option>
-                {houseTypes ?? houseTypes.map((value) => (
+                {houseTypes.map((value) => (
                     <option key={value} value={value}>
                         {value}
                     </option>
@@ -149,7 +149,7 @@ const StudentForm = ({fetchStudents}) => {
                 onChange={(e)=>setStudent({ ...student , petType: e.target.value})}
                 >           
                 <option>Open this select menu</option>
-                {petTypes ?? petTypes.map((value) => (
+                {petTypes.map((value) => (
                     <option key={value} value={value}>
                         {value}
                     </option>
