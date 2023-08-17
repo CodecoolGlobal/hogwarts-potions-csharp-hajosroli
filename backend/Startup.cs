@@ -1,3 +1,5 @@
+using System;
+using HogwartsPotions.Data;
 using HogwartsPotions.Models;
 using HogwartsPotions.Services;
 using Microsoft.AspNetCore.Builder;
@@ -10,10 +12,11 @@ using Microsoft.Extensions.Hosting;
 namespace HogwartsPotions;
 
 public class Startup
-{
-    public Startup(IConfiguration configuration)
+{private readonly IWebHostEnvironment _env;
+    public Startup(IConfiguration configuration, IWebHostEnvironment env)
     {
         Configuration = configuration;
+        _env = env;
     }
 
     public IConfiguration Configuration { get; }
@@ -21,18 +24,21 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddCors(c =>
+        services.AddCors(o => o.AddPolicy("AllowOrigin", options =>
         {
-            c.AddPolicy("AllowOrigin", options =>
-            {
-                options.WithOrigins("http://localhost:3000")
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-            });
-        });
+            options.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }));
         
+        string connectionString = _env.IsDevelopment()
+            ? "DefaultConnection"
+            : "DockerCommandsConnectionString";
+
+        Console.WriteLine(connectionString);
         services.AddDbContext<HogwartsContext>(options =>
-            options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(Configuration.GetConnectionString(connectionString )));
+        
         services.AddTransient<IRoomService, RoomService>();
         services.AddTransient<IStudentService, StudentService>();
         services.AddTransient<IPotionService, PotionService>();
@@ -44,6 +50,16 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        
+        using (var serviceScope = app.ApplicationServices.CreateScope())
+        {
+            var context = serviceScope.ServiceProvider.GetRequiredService<HogwartsContext>();
+            if (context.Database.EnsureCreated())
+            {
+                HogwartsContextSeed.ContextSeed(context);
+            }
+            
+        }
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
