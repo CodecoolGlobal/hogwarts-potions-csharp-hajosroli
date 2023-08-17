@@ -128,13 +128,13 @@ const BrewingForm = ()=> {
         </tr>
         </thead>
         <tbody>
-            {potions?? potions.map(p => (
+            {potions? potions.map(p => (
                 <tr key={p.id}>
                     <td>{p.id}</td>
                     <td>{p.student.id}</td>
                     <td>{p.student.name}</td>
                     <td>{p.status}</td>
-                    <td><ul>{p.ingredients? p.ingredients.map(i => <li key={i.key}>{i.name}</li>):"no ingredients"}</ul></td>
+                    <td><ul>{p.ingredients? p.ingredients.map(i => <li key={i.id}>{i.name}</li>):"no ingredients"}</ul></td>
                     <td key={`add-ingredient-${p.id}`}><button onClick={openInput}>Add ingredient</button></td>
                   {open ? (
                     <td key={`ingredient-input-${p.id}`}>
@@ -165,7 +165,7 @@ const BrewingForm = ()=> {
                       </>
                     </td>                   
                 </tr>
-            ))}
+            )): <h1>No potions</h1>}
         </tbody>
         </Table>
   </div>

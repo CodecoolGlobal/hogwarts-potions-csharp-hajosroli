@@ -1,3 +1,4 @@
+using System;
 using HogwartsPotions.Data;
 using HogwartsPotions.Models;
 using HogwartsPotions.Services;
@@ -12,9 +13,11 @@ namespace HogwartsPotions;
 
 public class Startup
 {
-    public Startup(IConfiguration configuration)
+    private readonly IWebHostEnvironment _env;
+    public Startup(IConfiguration configuration, IWebHostEnvironment env)
     {
         Configuration = configuration;
+        _env = env;
     }
 
     public IConfiguration Configuration { get; }
@@ -29,11 +32,15 @@ public class Startup
                 .AllowAnyHeader();
         }));
         
-        services.AddEntityFrameworkNpgsql()
-            .AddDbContext<HogwartsContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")))
-            .AddDbContext<HogwartsContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DockerCommandsConnectionString")));
+        string connectionString = _env.IsDevelopment()
+            ? "DefaultConnection"
+            : "DockerCommandsConnectionString";
+
+        Console.WriteLine(connectionString);
+        services.AddDbContext<HogwartsContext>(options =>
+            options.UseNpgsql(Configuration.GetConnectionString(connectionString ?? throw new InvalidOperationException("no connectionString"))));
+        
+       
         
         services.AddTransient<IRoomService, RoomService>();
         services.AddTransient<IStudentService, StudentService>();
@@ -43,9 +50,18 @@ public class Startup
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, HogwartsContext dbContext)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         
+        using (var serviceScope = app.ApplicationServices.CreateScope())
+        {
+            var context = serviceScope.ServiceProvider.GetRequiredService<HogwartsContext>();
+            if (context.Database.EnsureCreated())
+            {
+                HogwartsContextSeed.ContextSeed(context);
+            }
+            
+        }
         if (env.IsDevelopment())
         {
            
@@ -57,7 +73,7 @@ public class Startup
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             //app.UseHsts();
         }
-        HogwartsContextSeed.SeedData(dbContext);
+        
         app.UseCors("AllowOrigin");       
         app.UseHttpsRedirection();
         app.UseStaticFiles();
