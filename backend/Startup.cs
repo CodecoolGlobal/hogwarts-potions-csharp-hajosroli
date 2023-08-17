@@ -1,3 +1,4 @@
+using HogwartsPotions.Data;
 using HogwartsPotions.Models;
 using HogwartsPotions.Services;
 using Microsoft.AspNetCore.Builder;
@@ -21,31 +22,33 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddCors(c =>
+        services.AddCors(o => o.AddPolicy("AllowOrigin", options =>
         {
-            c.AddPolicy("AllowOrigin", options =>
-            {
-                options.WithOrigins("http://localhost:3000")
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-            });
-        });
+            options.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        }));
         
-        services.AddDbContext<HogwartsContext>(options =>
-            options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+        services.AddEntityFrameworkNpgsql()
+            .AddDbContext<HogwartsContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")))
+            .AddDbContext<HogwartsContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("DockerCommandsConnectionString")));
+        
         services.AddTransient<IRoomService, RoomService>();
         services.AddTransient<IStudentService, StudentService>();
         services.AddTransient<IPotionService, PotionService>();
         services.AddTransient<IRecipeService, RecipeService>();
-
         services.AddControllersWithViews();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, HogwartsContext dbContext)
     {
+        
         if (env.IsDevelopment())
         {
+           
             app.UseDeveloperExceptionPage();
         }
         else
@@ -54,8 +57,9 @@ public class Startup
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             //app.UseHsts();
         }
+        HogwartsContextSeed.SeedData(dbContext);
         app.UseCors("AllowOrigin");       
-        //app.UseHttpsRedirection();
+        app.UseHttpsRedirection();
         app.UseStaticFiles();
 
         app.UseRouting();
