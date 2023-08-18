@@ -68,8 +68,8 @@ namespace HogwartsPotions.Data
             {
                 var potions = new[]
                 {
-                    new Potion { Name = "Amortentia", Status = BrewingStatus.Brew },
-                    new Potion { Name = "Polyjuice Potion", Status = BrewingStatus.Brew },
+                    new Potion { Name = "Amortentia", Student = new Student { Name = "Draco Malfoy", HouseType = HouseType.Slytherin, PetType = PetType.None }, Status = BrewingStatus.Brew },
+                    new Potion { Name = "Polyjuice Potion", Student = new Student { Name = "Neville Longbottom", HouseType = HouseType.Gryffindor, PetType = PetType.Rat }, Status = BrewingStatus.Brew },
                     // Add more potions here
                 };
 
