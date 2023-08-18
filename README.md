@@ -35,8 +35,8 @@ To get started with Hogwarts Potions, follow these steps:
 
 1. Clone this repository: `git clone https://github.com/hajosroli/hogwarts-potions-csharp-react-postgresql.git`
 2. Navigate to the project directory: `cd hogwarts-potions-csharp-react-postgresql`
-3. Run docker-compose build
-4. Run docker-compose up
+3. Run `docker-compose build`
+4. Run `docker-compose up`
 5. Open your browser and go to: `http://localhost:3000`
 
 ## Technologies
