@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://your-image-url.com/hogwarts-logo.png" alt="Hogwarts Potions" width="200">
+  <img src="logo/hogwarts-logo.png" alt="Hogwarts Potions" width="200">
   <br>
   Hogwarts Potions
 </h1>
